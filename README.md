@@ -1,6 +1,6 @@
 # kenya_yetu
 
-A new Flutter project.
+This project is a flutter app that can help fight disaster management in Kenya. Enjoy
 
 ## Getting Started
 
