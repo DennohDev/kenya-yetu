@@ -1,8 +1,40 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kenya_yetu/const/AppColors.dart';
 
-class AmbulanceSerivice extends StatelessWidget {
-  const AmbulanceSerivice({Key? key}) : super(key: key);
+import 'bottom_navigation_controller.dart';
+
+class AmbulanceService extends StatefulWidget {
+  const AmbulanceService({Key? key}) : super(key: key);
+
+  @override
+  State<AmbulanceService> createState() => _AmbulanceServiceState();
+}
+
+class _AmbulanceServiceState extends State<AmbulanceService> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+
+  void sendUserDataToDB() async {
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    var currentUser = auth.currentUser;
+
+    CollectionReference collectionRef =
+    FirebaseFirestore.instance.collection("Ambulance_Request_Data");
+    return collectionRef.doc(currentUser!.email)
+        .set({
+      "name": _nameController.text,
+      "phone": _phoneController.text,
+      "age": _ageController.text,
+      "location": _locationController.text,
+    })
+        .then((value) => Navigator.push(
+        context, MaterialPageRoute(builder: (_) => const BottomNavigation())))
+        .catchError((error) => print("something is wrong. $error"));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +95,8 @@ class AmbulanceSerivice extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(5.0)),
                               labelText: 'enter your full name',
                             ),
+                            keyboardType: TextInputType.text,
+                            controller: _nameController,
                           ),
                         ),
                         Text(
@@ -80,6 +114,8 @@ class AmbulanceSerivice extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(5.0)),
                               labelText: 'ex: +8801234567890',
                             ),
+                            keyboardType: TextInputType.number,
+                            controller: _phoneController,
                           ),
                         ),
                         Text(
@@ -97,6 +133,8 @@ class AmbulanceSerivice extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(5.0)),
                               labelText: 'ex: 30',
                             ),
+                            keyboardType: TextInputType.number,
+                            controller: _ageController,
                           ),
                         ),
                         Text(
@@ -112,8 +150,10 @@ class AmbulanceSerivice extends StatelessWidget {
                             decoration: InputDecoration(
                               border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(5.0)),
-                              labelText: 'format: area,dist',
+                              labelText: 'Format: Area',
                             ),
+                            keyboardType: TextInputType.text,
+                            controller: _locationController,
                           ),
                         ),
                         SizedBox(
@@ -123,7 +163,9 @@ class AmbulanceSerivice extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue,
                             ),
-                            onPressed: () {},
+                            onPressed: () {
+                              sendUserDataToDB();
+                            },
                             icon: Icon(
                               Icons.send,
                               color: Colors.white,

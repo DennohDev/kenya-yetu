@@ -1,13 +1,42 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kenya_yetu/const/AppColors.dart';
 
+import 'bottom_navigation_controller.dart';
+
 class HelpPage extends StatefulWidget {
+  const HelpPage({Key? key}) : super(key: key);
+
   @override
-  _HelpPageState createState() => _HelpPageState();
+  State<HelpPage> createState() => _HelpPageState();
 }
 
 class _HelpPageState extends State<HelpPage> {
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _donationController = TextEditingController();
+
+  void sendUserDataToDB() async {
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    var currentUser = auth.currentUser;
+
+    CollectionReference collectionRef =
+    FirebaseFirestore.instance.collection("Offer_to_help_data");
+    return collectionRef.doc(currentUser!.email)
+        .set({
+      "name": _nameController.text,
+      "phone": _phoneController.text,
+      "age": _ageController.text,
+      "donation": _donationController.text,
+    })
+        .then((value) => Navigator.push(
+        context, MaterialPageRoute(builder: (_) => const BottomNavigation())))
+        .catchError((error) => print("something is wrong. $error"));
+  }
   @override
   Widget build(BuildContext context) {
     double dh = MediaQuery.of(context).size.height;
@@ -50,6 +79,8 @@ class _HelpPageState extends State<HelpPage> {
                               setState(() {});
                             },
                             onSaved: (val) {},
+                            controller: _nameController,
+                            keyboardType: TextInputType.text,
                           ),
                           SizedBox(
                             height: 20,
@@ -68,6 +99,8 @@ class _HelpPageState extends State<HelpPage> {
                             onChanged: (val) {
                               setState(() {});
                             },
+                            keyboardType: TextInputType.number,
+                            controller: _donationController,
                           ),
                           SizedBox(
                             height: 35,
@@ -87,6 +120,7 @@ class _HelpPageState extends State<HelpPage> {
                             onChanged: (val) {
                               setState(() {});
                             },
+                            controller: _phoneController,
                           ),
                           SizedBox(
                             height: 35,
@@ -94,6 +128,7 @@ class _HelpPageState extends State<HelpPage> {
                           TextFormField(
                             obscureText: true,
                             keyboardType: TextInputType.number,
+                            controller: _ageController,
                             decoration: InputDecoration(
                               hintText: 'Age',
                               border: OutlineInputBorder(),
@@ -115,7 +150,9 @@ class _HelpPageState extends State<HelpPage> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green,
                               ),
-                              onPressed: () {},
+                              onPressed: () {
+                                sendUserDataToDB();
+                              },
                               icon: Icon(
                                 Icons.send,
                                 color: Colors.white,

@@ -85,10 +85,8 @@ class _UserFormState extends State<UserForm> {
                 SizedBox(
                   height: 15.h,
                 ),
-                myTextField(
-                    "Enter your name", TextInputType.text, _nameController),
-                myTextField("Enter your phone number", TextInputType.number,
-                    _phoneController),
+                myTextField("Enter your name", TextInputType.text, _nameController),
+                myTextField("Enter your phone number", TextInputType.number, _phoneController),
                 TextField(
                   controller: _dobController,
                   readOnly: true,
