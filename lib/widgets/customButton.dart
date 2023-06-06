@@ -8,14 +8,14 @@ Widget customButton (String buttonText,onPressed){
     height: 56.h,
     child: ElevatedButton(
       onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: green,
+        elevation: 3,
+      ),
       child: Text(
         buttonText,
         style: TextStyle(
             color: Colors.white, fontSize: 18.sp),
-      ),
-      style: ElevatedButton.styleFrom(
-        primary: green,
-        elevation: 3,
       ),
     ),
   );

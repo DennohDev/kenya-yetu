@@ -18,6 +18,24 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
+  final RegExp _emailRegExp = RegExp(
+    r'^[\w-]+(\.[\w-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,})$',
+  );
+  bool _isEmailValid = true;
+
+  void _validateEmail(String input) {
+    setState(() {
+      _isEmailValid = _emailRegExp.hasMatch(input);
+    });
+  }
+
+  bool _isPasswordValid = true;
+
+  void _validatePassword(String input) {
+    setState(() {
+      _isPasswordValid = input.length >= 6;
+    });
+  }
 
   void signIn() async {
     try {
@@ -140,6 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Expanded(
                               child: TextField(
                                 controller: _emailController,
+                                onChanged: _validateEmail,
                                 decoration: InputDecoration(
                                   hintText: "abc@gmail.com",
                                   hintStyle: TextStyle(
@@ -151,6 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     fontSize: 15.sp,
                                     color: green,
                                   ),
+                                  errorText: _isEmailValid ? null : 'Please enter a valid email address'
                                 ),
                               ),
                             ),
@@ -181,9 +201,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             Expanded(
                               child: TextField(
                                 controller: _passwordController,
+                                onChanged: _validatePassword,
                                 obscureText: _obscureText,
                                 decoration: InputDecoration(
-                                  hintText: "password must be 6 character",
+                                  hintText: "Password",
                                   hintStyle: TextStyle(
                                     fontSize: 14.sp,
                                     color: const Color(0xFF414041),
@@ -193,6 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     fontSize: 15.sp,
                                     color: green,
                                   ),
+                                  errorText: _isPasswordValid ? null : 'Password must be more than 6 characters',
                                   suffixIcon: _obscureText == true
                                       ? IconButton(
                                           onPressed: () {
@@ -227,7 +249,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         customButton(
                           "Sign In",
                           () {
-                            signIn();
+                            String email = _emailController.text.trim();
+                            String password = _passwordController.text.trim();
+                            if(email.isNotEmpty && password.isNotEmpty){
+                              if(_isEmailValid && _isPasswordValid) {
+                              signIn();
+                            }
+                            } else {
+                              Fluttertoast.showToast(msg: 'Please fill in all fields');
+                            }
                           },
                         ),
                         SizedBox(
@@ -257,7 +287,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            RegistrationScreen()));
+                                            const RegistrationScreen()));
                               },
                             )
                           ],

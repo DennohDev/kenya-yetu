@@ -1,13 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kenya_yetu/const/AppColors.dart';
-import 'package:kenya_yetu/ui/help_page.dart';
+import 'package:kenya_yetu/widgets/dialer_icon.dart';
+
+import 'help_page.dart';
 
 class Help extends StatefulWidget {
+  const Help({super.key});
+
   @override
-  _HelpState createState() => _HelpState();
+  State<Help> createState() => _HelpState();
 }
 
 class _HelpState extends State<Help> {
+  final CollectionReference _requestData = 
+  FirebaseFirestore.instance.collection('Offer_to_help_data');
   @override
   Widget build(BuildContext context) {
     double dh = MediaQuery.of(context).size.height;
@@ -15,203 +22,100 @@ class _HelpState extends State<Help> {
     return Scaffold(
       body: Container(
         child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
           child: Column(
             children: [
-              SizedBox(
-                height: 60,
-              ),
-              GestureDetector(
-                onTap: () {},
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Material(
-                      elevation: 10,
-                      child: Container(
-                        height: dh * 0.12,
-                        width: dw * 0.8,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Post how you can Help",
-                                style: TextStyle(
-                                    color: green, fontWeight: FontWeight.bold),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Material(
+                    elevation: 10,
+                    child: SizedBox(
+                      height: dh * 0.19,
+                      width: dw * 0.9,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "How can you help?",
+                              style: TextStyle(
+                                  color: green, fontWeight: FontWeight.bold),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                child: Text(
+                                  "Click here to offer help",
+                                  style: TextStyle(
+                                      color: green,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  HelpPage()));
-                                    },
-                                    child: Container(
-                                        height: 40,
-                                        width: 300,
-                                        decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            gradient: LinearGradient(colors: [
-                                              Color(0xFFA2D5C5),
-                                              Color(0xFF318B6F),
-                                            ])),
-                                        child: Center(child: Text("Go")))),
-                              ),
-                            ],
-                          ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const HelpPage()));
+                                  },
+                                  child: Container(
+                                      height: 40,
+                                      width: 300,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        color: const Color(0xFFA2D5C5),
+                                          ),
+                                      child:
+                                          const Center(child: Text("Offer Help")))),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(10),
-                    elevation: 10,
-                    child: Container(
-                      height: dh * 0.1,
-                      width: dw * 0.8,
-                      child: Center(
-                          child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: InkWell(
-                              onTap: () {},
-                              child: Text(
-                                "Ready to Give Food",
-                                style: TextStyle(
-                                    color: green, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             Container(
+              height: dh*0.7,
+              color: Colors.grey.shade300,
+               child: StreamBuilder(
+                stream: _requestData.snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot){
+                  if (streamSnapshot.hasData){
+                    return ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      itemCount: streamSnapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                      final DocumentSnapshot documentSnapshot = 
+                      streamSnapshot.data!.docs[index];
+                      return Card(
+                        margin: const EdgeInsets.all(10),
+                        child: ListTile(
+                          title: Text(documentSnapshot['name']),
+                          subtitle: Column(
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  "Quantity: 10kg Maize",
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Location: Moyale"),
-                              )
+                              Text('Donation: ' + documentSnapshot['donation']),
+                              Text('phone: ' + documentSnapshot['phone']),
+                              Text('location: ' + documentSnapshot['location']),
+                              Text('Age: ' + documentSnapshot['age']),
                             ],
                           ),
-                        ],
-                      )),
-                    ),
-                  ),
-                ),
-              ),
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(10),
-                    elevation: 10,
-                    child: Container(
-                      height: dh * 0.1,
-                      width: dw * 0.8,
-                      child: Center(
-                          child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: InkWell(
-                              onTap: () {},
-                              child: Text(
-                                "Ready to Donate Blankets",
-                                style: TextStyle(
-                                    color: green, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Quantity: 50"),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Location: Kisumu"),
-                              )
-                            ],
-                          ),
-                        ],
-                      )),
-                    ),
-                  ),
-                ),
-              ),
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(10),
-                    elevation: 10,
-                    child: Container(
-                      height: dh * 0.1,
-                      width: dw * 0.8,
-                      child: Center(
-                          child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: InkWell(
-                              onTap: () {},
-                              child: Text(
-                                "Ready to Pay Medical Bill",
-                                style: TextStyle(
-                                    color: green, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Quantity: Ksh1000"),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Location: Nairobi"),
-                              )
-                            ],
-                          ),
-                        ],
-                      )),
-                    ),
-                  ),
-                ),
-              ),
+                          trailing: DialerIcon(phoneNumber: documentSnapshot['phone']),
+                        ),
+                      );  
+                      },
+                    );
+                  }
+                  return const Center(child: CircularProgressIndicator());
+                },
+               ),
+             ),
             ],
           ),
         ),

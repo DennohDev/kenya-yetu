@@ -6,8 +6,16 @@ import 'package:kenya_yetu/ui/donation_Screen.dart';
 import 'package:kenya_yetu/ui/guidance_Screen.dart';
 import 'package:kenya_yetu/ui/request_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+
+class HomeScreen extends StatefulWidget {
+
   const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +26,7 @@ class HomeScreen extends StatelessWidget {
         centerTitle: true,
       ),
       drawer: NavBar(),
-     // bottomNavigationBar: BottomNavigation(),
+      //bottomNavigationBar: const BottomNavigation(),
       body: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

@@ -3,7 +3,6 @@ import 'package:kenya_yetu/const/AppColors.dart';
 import 'package:kenya_yetu/ui/emergency_page.dart';
 import 'package:kenya_yetu/ui/home_Screen.dart';
 
-import 'emergency_page.dart';
 
 class BottomNavigation extends StatefulWidget {
   const BottomNavigation({Key? key}) : super(key: key);

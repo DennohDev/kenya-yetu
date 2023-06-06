@@ -34,17 +34,18 @@ class _RequestScreenState extends State<RequestScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: green,
-        title: Text('Request'),
+        title: const Text('Request'),
         centerTitle: true,
       ),
       body: SizedBox.expand(
-          child: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() => _currentIndex = index);
-        },
-        children: <Widget>[Notify(), Help(), HelpPeople()],
-      )),
+        child: PageView(
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() => _currentIndex = index);
+          },
+          children: <Widget>[Notify(), Help(), HelpPeople()],
+        ),
+      ),
       bottomNavigationBar: BottomNavyBar(
         selectedIndex: _currentIndex,
         onItemSelected: (index) {

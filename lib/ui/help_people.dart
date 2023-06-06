@@ -1,13 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kenya_yetu/const/AppColors.dart';
 import 'package:kenya_yetu/ui/request.dart';
+import 'package:kenya_yetu/widgets/dialer_icon.dart';
 
 class HelpPeople extends StatefulWidget {
+  const HelpPeople({super.key});
+
   @override
-  _HelpPeopleState createState() => _HelpPeopleState();
+  State<HelpPeople> createState() => _HelpPeopleState();
 }
 
 class _HelpPeopleState extends State<HelpPeople> {
+  final CollectionReference _requestData = 
+  FirebaseFirestore.instance.collection('Request_for_help_data');
   @override
   Widget build(BuildContext context) {
     double dh = MediaQuery.of(context).size.height;
@@ -15,239 +21,101 @@ class _HelpPeopleState extends State<HelpPeople> {
     return Scaffold(
       body: Container(
         child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
           child: Column(
             children: [
-              SizedBox(
-                height: 40,
-              ),
-              GestureDetector(
-                onTap: () {},
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Material(
-                      elevation: 10,
-                      child: Container(
-                        height: dh * 0.12,
-                        width: dw * 0.8,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Request for help",
-                                style: TextStyle(
-                                    color: green, fontWeight: FontWeight.bold),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Material(
+                    elevation: 10,
+                    child: SizedBox(
+                      height: dh * 0.19,
+                      width: dw * 0.9,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Requests for help",
+                              style: TextStyle(
+                                  color: green, fontWeight: FontWeight.bold),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                child: Text(
+                                  "Click here to request for help",
+                                  style: TextStyle(
+                                      color: green,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
-                              SizedBox(
-                                height: 12,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  Requests()));
-                                    },
-                                    child: Container(
-                                        height: 40,
-                                        width: 300,
-                                        decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            gradient: LinearGradient(colors: [
-                                              Color(0xFFA2D5C5),
-                                              Color(0xFF318B6F),
-                                            ])),
-                                        child: Center(child: Text("Go")))),
-                              ),
-                            ],
-                          ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const Requests()));
+                                  },
+                                  child: Container(
+                                      height: 40,
+                                      width: 300,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        color: const Color(0xFFA2D5C5),
+                                          ),
+                                      child:
+                                          const Center(child: Text("Need Help")))),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(10),
-                    elevation: 10,
-                    child: Container(
-                      height: dh * 0.1,
-                      width: dw * 0.8,
-                      child: Center(
-                          child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: InkWell(
-                              onTap: () {},
-                              child: Text(
-                                "Need food",
-                                style: TextStyle(
-                                  color: green,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             Container(
+              height: dh*0.7,
+              color: Colors.grey.shade300,
+               child: StreamBuilder(
+                stream: _requestData.snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot){
+                  if (streamSnapshot.hasData){
+                    return ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      itemCount: streamSnapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                      final DocumentSnapshot documentSnapshot = 
+                      streamSnapshot.data!.docs[index];
+                      return Card(
+                        margin: const EdgeInsets.all(10),
+                        child: ListTile(
+                          title: Text(documentSnapshot['name']),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Quantity: 100"),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Location: Kiserian"),
-                              )
+                              Text('Need: ' + documentSnapshot['need']),
+                              Text('phone: ' + documentSnapshot['phone']),
+                              Text('location: ' + documentSnapshot['location']),
+                              Text('Age: ' + documentSnapshot['age']),
                             ],
                           ),
-                        ],
-                      )),
-                    ),
-                  ),
-                ),
-              ),
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(10),
-                    elevation: 10,
-                    child: Container(
-                      height: dh * 0.1,
-                      width: dw * 0.8,
-                      child: Center(
-                          child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: InkWell(
-                              onTap: () {},
-                              child: Text(
-                                "Need blankets",
-                                style: TextStyle(
-                                  color: green,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Quantity: 50"),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Location: Kapenguria"),
-                              )
-                            ],
-                          ),
-                        ],
-                      )),
-                    ),
-                  ),
-                ),
-              ),
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(10),
-                    elevation: 10,
-                    child: Container(
-                      height: dh * 0.1,
-                      width: dw * 0.8,
-                      child: Center(
-                          child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: InkWell(
-                              onTap: () {},
-                              child: Text(
-                                "Need Medical Help",
-                                style: TextStyle(
-                                  color: green,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Quantity: KSh4000"),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Location: Kapsabet"),
-                              )
-                            ],
-                          ),
-                        ],
-                      )),
-                    ),
-                  ),
-                ),
-              ),
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(10),
-                    elevation: 10,
-                    child: Container(
-                      height: dh * 0.1,
-                      width: dw * 0.8,
-                      child: Center(
-                          child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: InkWell(
-                              onTap: () {},
-                              child: Text(
-                                "I am searching for shelter",
-                                style: TextStyle(
-                                  color: green,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Quantity: 10 people "),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Location: Kwale"),
-                              )
-                            ],
-                          ),
-                        ],
-                      )),
-                    ),
-                  ),
-                ),
-              ),
+                          trailing: DialerIcon(phoneNumber: documentSnapshot['phone']),
+                        ),
+                      );  
+                      },
+                    );
+                  }
+                  return const Center(child: CircularProgressIndicator());
+                },
+               ),
+             ),
             ],
           ),
         ),

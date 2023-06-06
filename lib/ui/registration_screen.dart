@@ -16,7 +16,26 @@ class RegistrationScreen extends StatefulWidget {
 class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+  final RegExp _emailRegExp = RegExp(
+    r'^[\w-]+(\.[\w-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,})$',
+  );
   bool _obscureText = true;
+  bool _isPasswordValid = true;
+  bool _doPasswordsMatch = true;
+  bool _isEmailValid = true;
+
+  void _validatePassword(String input) {
+    setState(() {
+      _isPasswordValid = input.length > 6;
+      _doPasswordsMatch = _passwordController.text == _confirmPasswordController.text;
+    });
+  }
+  void _validateEmail(String input) {
+    setState(() {
+      _isEmailValid = _emailRegExp.hasMatch(input);
+    });
+  }
 
   signUp() async {
     try {
@@ -139,6 +158,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             Expanded(
                               child: TextField(
                                 controller: _emailController,
+                                onChanged: _validateEmail,
                                 decoration: InputDecoration(
                                   hintText: "email",
                                   hintStyle: TextStyle(
@@ -146,6 +166,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     color: const Color(0xFFBBBBBB),
                                   ),
                                   labelText: 'EMAIL',
+                                  errorText: _isEmailValid ? null : 'Please enter a valid email',
                                   labelStyle: TextStyle(
                                     fontSize: 15.sp,
                                     color: green,
@@ -180,6 +201,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             Expanded(
                               child: TextField(
                                 controller: _passwordController,
+                                onChanged: _validatePassword,
                                 obscureText: _obscureText,
                                 decoration: InputDecoration(
                                   hintText: "password must be 6 character",
@@ -192,6 +214,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     fontSize: 15.sp,
                                     color: green,
                                   ),
+                                  errorText: _isPasswordValid ? null : 'Passwords must be more than 6 characters',
                                   suffixIcon: _obscureText == true
                                       ? IconButton(
                                           onPressed: () {
@@ -218,7 +241,71 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             ),
                           ],
                         ),
-
+                        SizedBox(
+                          height: 10.h,
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              height: 48.h,
+                              width: 41.w,
+                              decoration: BoxDecoration(
+                                  color: green,
+                                  borderRadius: BorderRadius.circular(12.r)),
+                              child: Center(
+                                child: Icon(
+                                  Icons.lock_outline,
+                                  color: Colors.white,
+                                  size: 20.w,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10.w,
+                            ),
+                            Expanded(
+                              child: TextField(
+                                controller: _confirmPasswordController,
+                                obscureText: _obscureText,
+                                onChanged: _validatePassword,
+                                decoration: InputDecoration(
+                                  hintText: "Confirm Password",
+                                  hintStyle: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: const Color(0xFFBBBBBB),
+                                  ),
+                                  labelText: 'CONFIRM PASSWORD',
+                                  labelStyle: TextStyle(
+                                    fontSize: 15.sp,
+                                    color: green,
+                                  ),
+                                  errorText: _doPasswordsMatch ? null : 'Passwords do not match',
+                                  suffixIcon: _obscureText == true
+                                      ? IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              _obscureText = false;
+                                            });
+                                          },
+                                          icon: Icon(
+                                            Icons.remove_red_eye,
+                                            size: 20.w,
+                                          ))
+                                      : IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              _obscureText = true;
+                                            });
+                                          },
+                                          icon: Icon(
+                                            Icons.visibility_off,
+                                            size: 20.w,
+                                          )),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                         SizedBox(
                           height: 50.h,
                         ),
@@ -228,7 +315,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           height: 56.h,
                           child: ElevatedButton(
                             onPressed: () {
-                              signUp();
+                              String email = _emailController.text.trim();
+                              String password = _passwordController.text.trim();
+                              String confirmPassword = _confirmPasswordController.text.trim();
+                              if (confirmPassword.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
+                                if(_isPasswordValid && _doPasswordsMatch && _isEmailValid){
+                                signUp();
+                                Fluttertoast.showToast(msg: 'Regestering User');
+                              }
+                              } else {
+                                Fluttertoast.showToast(msg: 'Please fill in all fields');
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: green,
@@ -267,7 +364,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 Navigator.push(
                                     context,
                                    MaterialPageRoute(
-                                        builder: (context) => LoginScreen()));
+                                        builder: (context) => const LoginScreen()));
                               },
                             )
                           ],

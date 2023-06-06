@@ -1,235 +1,64 @@
+// ignore_for_file: non_constant_identifier_names
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:kenya_yetu/const/AppColors.dart';
-import 'package:kenya_yetu/ui/request.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'noti.dart';
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 class Notify extends StatefulWidget {
+  const Notify({super.key});
+
   @override
-  _NotifyState createState() => _NotifyState();
+  State<Notify> createState() => _NotifyState();
 }
 
 class _NotifyState extends State<Notify> {
+  final CollectionReference _Alerts =
+      FirebaseFirestore.instance.collection('Alerts');
+    
+  @override
+  void initState() {
+    super.initState();
+    Noti.initialize(flutterLocalNotificationsPlugin);
+  }
   @override
   Widget build(BuildContext context) {
     double dh = MediaQuery.of(context).size.height;
     double dw = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: Container(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(
-                height: 40,
-              ),
-              GestureDetector(
-                onTap: () {},
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Material(
-                      elevation: 10,
-                      child: Container(
-                        height: dh * 0.15,
-                        width: dw * 0.8,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "What is your current Location",
-                                style: TextStyle(
-                                    color: green, fontWeight: FontWeight.bold),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                  child: Text(
-                                    "Click here to access your current location",
-                                    style: TextStyle(
-                                        color: green,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  Requests()));
-                                    },
-                                    child: Container(
-                                        height: 40,
-                                        width: 300,
-                                        decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            gradient: LinearGradient(colors: [
-                                              Color(0xFFA2D5C5),
-                                              Color(0xFF318B6F),
-                                            ])),
-                                        child:
-                                            Center(child: Text("Need Help")))),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+      body: SingleChildScrollView(
+        child: Container(
+          width: dw,
+          height: dh,
+          child: StreamBuilder(
+        stream: _Alerts.snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
+          if (streamSnapshot.hasData) {
+            return ListView.builder(
+              scrollDirection: Axis.vertical,
+              itemCount: streamSnapshot.data!.docs.length,
+              itemBuilder: (context, index) {
+                final DocumentSnapshot documentSnapshot =
+                    streamSnapshot.data!.docs[index];
+                    print(documentSnapshot['alert'] +':'+index.toString());
+                return Card(
+                  margin: const EdgeInsets.all(10),
+                  child: ListTile(
+                    leading: const Icon(Icons.notifications_active_rounded, color: Colors.red,),
+                    title: Text(documentSnapshot['alert']),
+                    subtitle: Text(
+                      documentSnapshot['content'],
                     ),
                   ),
-                ),
-              ),
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(10),
-                    elevation: 10,
-                    child: Container(
-                      height: dh * 0.1,
-                      width: dw * 0.8,
-                      child: Center(
-                          child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Red alert move to safe zone",
-                              style: TextStyle(
-                                color: green,
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  onTap: () {},
-                                  child: Text(
-                                    "Evacuate Immidiately",
-                                    style: TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Location: Masinga"),
-                              )
-                            ],
-                          ),
-                        ],
-                      )),
-                    ),
-                  ),
-                ),
-              ),
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(10),
-                    elevation: 10,
-                    child: Container(
-                      height: dh * 0.1,
-                      width: dw * 0.8,
-                      child: Center(
-                          child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Flood Alert, Move to higher areas",
-                              style: TextStyle(
-                                color: green,
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  onTap: () {},
-                                  child: Text(
-                                    "Evacuate Now",
-                                    style: TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Location: Mombasa"),
-                              )
-                            ],
-                          ),
-                        ],
-                      )),
-                    ),
-                  ),
-                ),
-              ),
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(10),
-                    elevation: 10,
-                    child: Container(
-                      height: dh * 0.1,
-                      width: dw * 0.8,
-                      child: Center(
-                          child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Earthquake Alert: Leave storey buildings",
-                              style: TextStyle(
-                                color: green,
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  onTap: () {},
-                                  child: Text(
-                                    "Evacuate within the next hour",
-                                    style: TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("Location: Kitale"),
-                              )
-                            ],
-                          ),
-                        ],
-                      )),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+                );
+              },
+            );
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
+      ),
         ),
       ),
     );

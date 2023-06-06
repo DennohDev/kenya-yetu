@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:kenya_yetu/const/AppColors.dart';
 
 import 'bottom_navigation_controller.dart';
@@ -19,6 +22,22 @@ class _HelpPageState extends State<HelpPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _donationController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+   String _location = '';
+  final RegExp _digitRegExp = RegExp(r'^\d+$');
+  bool _isPhoneValid = true;
+  bool _isAgeValid = true;
+  void _validateAge(String input) {
+    setState(() {
+      _isAgeValid = input.length==2 && _digitRegExp.hasMatch(input);
+    });
+  }
+  void _validatePhoneNumber(String input) {
+    setState(() {
+      _isPhoneValid = input.length == 10 && _digitRegExp.hasMatch(input);
+    });
+  }
+
 
   void sendUserDataToDB() async {
     final FirebaseAuth auth = FirebaseAuth.instance;
@@ -26,12 +45,24 @@ class _HelpPageState extends State<HelpPage> {
 
     CollectionReference collectionRef =
     FirebaseFirestore.instance.collection("Offer_to_help_data");
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+    setState(() {
+      _location = placemarks[0].street!;
+      });
+      Fluttertoast.showToast(msg: 'Getting Location');
+    print(placemarks);
+    double latitude = position.latitude;
+    double longitude = position.longitude;
     return collectionRef.doc(currentUser!.email)
         .set({
       "name": _nameController.text,
       "phone": _phoneController.text,
       "age": _ageController.text,
       "donation": _donationController.text,
+      "location": _location,
+      "latitude": latitude,
+      "longitude": longitude,
     })
         .then((value) => Navigator.push(
         context, MaterialPageRoute(builder: (_) => const BottomNavigation())))
@@ -42,14 +73,19 @@ class _HelpPageState extends State<HelpPage> {
     double dh = MediaQuery.of(context).size.height;
     double dw = MediaQuery.of(context).size.width;
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: green,
+        title: const Text("Offer to Help"),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: Center(
           child: Material(
             elevation: 10,
             child: Container(
-              height: dh * 0.7,
-              width: dw * 0.8,
-              padding: EdgeInsets.all(50),
+              height: dh ,
+              width: dw * 0.9,
+              padding: const EdgeInsets.all(20),
               child: SingleChildScrollView(
                 child: Column(
                   children: <Widget>[
@@ -61,7 +97,7 @@ class _HelpPageState extends State<HelpPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 40,
                     ),
                     Form(
@@ -69,81 +105,52 @@ class _HelpPageState extends State<HelpPage> {
                       child: Column(
                         children: <Widget>[
                           TextFormField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: 'Name',
                               border: OutlineInputBorder(),
                             ),
-                            validator: (val) =>
-                                val != null ? 'Enter Name' : null,
-                            onChanged: (val) {
-                              setState(() {});
-                            },
-                            onSaved: (val) {},
                             controller: _nameController,
                             keyboardType: TextInputType.text,
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
                           TextFormField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: 'The donation you can make',
                               border: OutlineInputBorder(),
                             ),
-                            validator: (val) {
-                              if (val != null) {
-                                return 'Can,t be empty';
-                              }
-                              return null;
-                            },
-                            onChanged: (val) {
-                              setState(() {});
-                            },
-                            keyboardType: TextInputType.number,
+                            keyboardType: TextInputType.text,
                             controller: _donationController,
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 35,
                           ),
                           TextFormField(
+                            onChanged: _validatePhoneNumber,
                             decoration: InputDecoration(
                               hintText: 'Phone Number',
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
+                              errorText: _isPhoneValid ? null : 'Enter a valid phone number with 10 digits'
                             ),
                             keyboardType: TextInputType.number,
-                            validator: (val) {
-                              if (val != null) {
-                                return 'Enter phone num';
-                              }
-                              return null;
-                            },
-                            onChanged: (val) {
-                              setState(() {});
-                            },
                             controller: _phoneController,
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 35,
                           ),
+                          
                           TextFormField(
-                            obscureText: true,
+                            onChanged: _validateAge,
                             keyboardType: TextInputType.number,
                             controller: _ageController,
                             decoration: InputDecoration(
                               hintText: 'Age',
                               border: OutlineInputBorder(),
+                              errorText: _isAgeValid ? null : 'Input your correct age eg.20'
                             ),
-                            validator: (val) {
-                              if (val != null || (val?.length != 10)) {
-                                return 'Cannot be empty';
-                              }
-                              return null;
-                            },
-                            onChanged: (val) {
-                              setState(() {});
-                            },
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
                           ElevatedButton.icon(
@@ -151,13 +158,24 @@ class _HelpPageState extends State<HelpPage> {
                                 backgroundColor: Colors.green,
                               ),
                               onPressed: () {
+                            String donation = _donationController.text.trim();
+                            String phone = _phoneController.text.trim();
+                            String age = _ageController.text.trim();
+                            String name = _nameController.text.trim();
+                            if (donation.isNotEmpty && phone.isNotEmpty && age.isNotEmpty && name.isNotEmpty){
+                              if(_isAgeValid && _isPhoneValid){
                                 sendUserDataToDB();
+                                Fluttertoast.showToast(msg: 'Sending Your Request');
+                              }
+                            } else {
+                              Fluttertoast.showToast(msg: 'Please input all fields');
+                            }
                               },
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.send,
                                 color: Colors.white,
                               ),
-                              label: Text(
+                              label: const Text(
                                 'DONE',
                                 style: TextStyle(
                                   color: Colors.white,
