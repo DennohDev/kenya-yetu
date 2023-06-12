@@ -99,6 +99,7 @@ class _HelpState extends State<Help> {
                         child: ListTile(
                           title: Text(documentSnapshot['name']),
                           subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Donation: ' + documentSnapshot['donation']),
                               Text('phone: ' + documentSnapshot['phone']),
